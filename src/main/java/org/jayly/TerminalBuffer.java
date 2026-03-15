@@ -9,16 +9,19 @@ import java.util.HashMap;
  * it.
  */
 public class TerminalBuffer {
-    private Integer width;
-    private Integer height;
+    private int width;
+    private int height;
     /**
      * Represents configurable max number of lines
      */
-    private Integer scrollbackMaxSize;
+    private int scrollbackMaxSize;
     /**
-     * Represent text color to be applied 
+     * Represent text color to be applied using the ANSIColor enum.
      */
     private String foregroundColor;
+    /**
+     * Represent background color to be applied using the ANSIColor enum.
+     */
     private String backgroundColor;
     /**
      * Represents styles enabled for the editor. The styles are applied once a new
@@ -31,7 +34,7 @@ public class TerminalBuffer {
     private Cursor cursor;
     private Editor editor;
 
-    public TerminalBuffer(Integer width, Integer height, Integer scrollbackMaxSize, Document document) {
+    public TerminalBuffer(int width, int height, int scrollbackMaxSize, Document document) {
         this.width = width;
         this.height = height;
         this.scrollbackMaxSize = scrollbackMaxSize;
@@ -45,7 +48,7 @@ public class TerminalBuffer {
         this.styles.put(StyleFlag.UNDERLINE, false);
     }
 
-    public void setWidth(Integer width) {
+    public void setWidth(int width) {
         this.width = width;
     }
 
@@ -53,7 +56,7 @@ public class TerminalBuffer {
         return this.width;
     }
 
-    public void setHeight(Integer height) {
+    public void setHeight(int height) {
         this.height = height;
     }
 
@@ -61,7 +64,7 @@ public class TerminalBuffer {
         return this.height;
     }
 
-    public void setScrollbackMaxSize(Integer scrollbackMaxSize) {
+    public void setScrollbackMaxSize(int scrollbackMaxSize) {
         this.scrollbackMaxSize = scrollbackMaxSize;
     }
 

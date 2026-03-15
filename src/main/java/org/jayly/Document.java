@@ -21,7 +21,7 @@ public class Document {
         return content;
     }
 
-    public String getLine(Integer lineNumber) {
+    public String getLine(int lineNumber) {
         if (lineNumber < 0 || lineNumber >= lines.size()) {
             return null;
         }
@@ -32,14 +32,14 @@ public class Document {
         return lines;
     }
 
-    public ArrayList<String> getLines(Integer startLine, Integer endLine) {
+    public ArrayList<String> getLines(int startLine, int endLine) {
         if (startLine < 0 || endLine >= lines.size() || startLine > endLine) {
             return null;
         }
         return new ArrayList<String>(lines.subList(startLine, endLine + 1));
     }
 
-    public void setLine(Integer lineNumber, String newLine) {
+    public void setLine(int lineNumber, String newLine) {
         if (lineNumber < 0 || lineNumber >= lines.size()) {
             return;
         }
@@ -47,12 +47,12 @@ public class Document {
         this.content = String.join("\n", lines);
     }
 
-    public void insertLine(Integer lineNumber, String newLine) {
+    public void insertLine(int lineNumber, String newLine) {
         lines.add(lineNumber, newLine);
         this.content = String.join("\n", lines);
     }
 
-    public void deleteLine(Integer lineNumber) {
+    public void deleteLine(int lineNumber) {
         if (lineNumber < 0 || lineNumber >= lines.size()) {
             return;
         }

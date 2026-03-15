@@ -21,7 +21,7 @@ public class Editor {
     /**
      * The line number of the top line of the screen.
      */
-    private Integer topLineNumber;
+    private int topLineNumber;
 
     public Editor(TerminalBuffer buffer, Document document) {
         this.buffer = buffer;
@@ -29,12 +29,12 @@ public class Editor {
         this.topLineNumber = 0;
     }
 
-    public Integer getLineNumberFromRow(Integer row) {
+    public int getLineNumberFromRow(int row) {
         return this.topLineNumber + row;
     }
 
-    public void deleteCharacter(Integer row, Integer column) {
-        final Integer lineNumber = this.getLineNumberFromRow(row);
+    public void deleteCharacter(int row, int column) {
+        final int lineNumber = this.getLineNumberFromRow(row);
         String line = document.getLine(lineNumber);
         if (line == null || column < 0 || column >= line.length()) {
             return;
@@ -46,8 +46,8 @@ public class Editor {
         cursor.moveCursorTo(row, column - 1);
     }
 
-    public void insertCharacter(Integer row, Integer column, Character character) {
-        final Integer lineNumber = this.getLineNumberFromRow(row);
+    public void insertCharacter(int row, int column, Character character) {
+        final int lineNumber = this.getLineNumberFromRow(row);
         String line = document.getLine(lineNumber);
         if (line == null) {
             line = "";
@@ -62,8 +62,8 @@ public class Editor {
         cursor.moveCursorTo(row, column + 1);
     }
 
-    public void insertNewLine(Integer row) {
-        final Integer lineNumber = this.getLineNumberFromRow(row);
+    public void insertNewLine(int row) {
+        final int lineNumber = this.getLineNumberFromRow(row);
         document.insertLine(lineNumber, "");
         
         // Set cursor to the beginning of the new line
@@ -71,8 +71,8 @@ public class Editor {
         cursor.moveCursorTo(row, 0);
     }
 
-    public void removeNewLine(Integer row) {
-        final Integer lineNumber = this.getLineNumberFromRow(row);
+    public void removeNewLine(int row) {
+        final int lineNumber = this.getLineNumberFromRow(row);
         if (lineNumber <= 0) {
             return;
         }
@@ -89,7 +89,7 @@ public class Editor {
     /**
      * Get character at position from screen and scrollback.
      */
-    public Character getCharacterAt(Integer row, Integer column) {
+    public Character getCharacterAt(int row, int column) {
         final CharacterCell cell = this.getAttributesAt(row, column);
         if (cell == null) {
             return null;
@@ -100,7 +100,7 @@ public class Editor {
     /**
      * Get attributes at position from screen and scrollback.
      */
-    public CharacterCell getAttributesAt(Integer row, Integer column) {
+    public CharacterCell getAttributesAt(int row, int column) {
         final ArrayList<CharacterCell> rowGrid = screenGrid.get(row);
         if (rowGrid == null || column < 0 || column >= rowGrid.size()) {
             return null;
@@ -114,7 +114,7 @@ public class Editor {
      * @param row The row number of the screen or scrollback, not the line number of
      *            the file.
      */
-    public String getLine(Integer row) {
+    public String getLine(int row) {
         return null;
     }
 

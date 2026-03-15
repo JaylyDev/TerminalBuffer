@@ -1,8 +1,8 @@
 package org.jayly;
 
 public class Cursor {
-    private Integer column;
-    private Integer row;
+    private int column;
+    private int row;
     private TerminalBuffer buffer;
 
     public Cursor(TerminalBuffer buffer) {
@@ -11,22 +11,22 @@ public class Cursor {
         this.row = 0;
     }
 
-    public Integer getColumn() {
+    public int getColumn() {
         return column;
     }
 
-    public void setColumn(Integer column) {
+    public void setColumn(int column) {
         if (this.outOfBounds(column, this.getRow())) {
             return;
         }
         this.column = column;
     }
 
-    public Integer getRow() {
+    public int getRow() {
         return row;
     }
 
-    public void setRow(Integer row) {
+    public void setRow(int row) {
         if (this.outOfBounds(this.getColumn(), row)) {
             return;
         }
@@ -49,7 +49,7 @@ public class Cursor {
         this.setColumn(this.getColumn() + 1);
     }
 
-    public void moveCursorTo(Integer row, Integer column) {
+    public void moveCursorTo(int row, int column) {
         this.setRow(row);
         this.setColumn(column);
     }
@@ -57,7 +57,7 @@ public class Cursor {
     /**
      * Check if the cursor is out of bounds of the terminal buffer
      */
-    public Boolean outOfBounds(Integer column, Integer row) {
+    public Boolean outOfBounds(int column, int row) {
         return column < 0 || column >= buffer.getWidth() || row < 0 || row >= buffer.getHeight();
     }
 }
