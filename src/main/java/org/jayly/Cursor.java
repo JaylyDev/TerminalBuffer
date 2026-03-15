@@ -34,22 +34,30 @@ public class Cursor {
     }
 
     public void moveCursorUp() {
-        this.setColumn(this.getColumn() - 1);
-    }
-
-    public void moveCursorDown() {
-        this.setColumn(this.getColumn() + 1);
-    }
-
-    public void moveCursorLeft() {
         this.setRow(this.getRow() - 1);
     }
 
-    public void moveCursorRight() {
+    public void moveCursorDown() {
         this.setRow(this.getRow() + 1);
     }
 
+    public void moveCursorLeft() {
+        this.setColumn(this.getColumn() - 1);
+    }
+
+    public void moveCursorRight() {
+        this.setColumn(this.getColumn() + 1);
+    }
+
+    public void moveCursorTo(Integer row, Integer column) {
+        this.setRow(row);
+        this.setColumn(column);
+    }
+
+    /**
+     * Check if the cursor is out of bounds of the terminal buffer
+     */
     public Boolean outOfBounds(Integer column, Integer row) {
-        return this.column >= column && this.row >= row;
+        return column < 0 || column >= buffer.getWidth() || row < 0 || row >= buffer.getHeight();
     }
 }

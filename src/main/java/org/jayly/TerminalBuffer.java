@@ -15,6 +15,9 @@ public class TerminalBuffer {
      * Represents configurable max number of lines
      */
     private Integer scrollbackMaxSize;
+    /**
+     * Represent text color to be applied 
+     */
     private String foregroundColor;
     private String backgroundColor;
     /**
@@ -26,6 +29,7 @@ public class TerminalBuffer {
     private HashMap<StyleFlag, Boolean> styles;
     private Document document;
     private Cursor cursor;
+    private Editor editor;
 
     public TerminalBuffer(Integer width, Integer height, Integer scrollbackMaxSize, Document document) {
         this.width = width;
@@ -45,8 +49,16 @@ public class TerminalBuffer {
         this.width = width;
     }
 
+    public int getWidth() {
+        return this.width;
+    }
+
     public void setHeight(Integer height) {
         this.height = height;
+    }
+
+    public int getHeight() {
+        return this.height;
     }
 
     public void setScrollbackMaxSize(Integer scrollbackMaxSize) {
@@ -67,5 +79,13 @@ public class TerminalBuffer {
 
     public Cursor getCursor() {
         return this.cursor;
+    }
+
+    public Document getDocument() {
+        return this.document;
+    }
+
+    public Editor getEditor() {
+        return this.editor;
     }
 }

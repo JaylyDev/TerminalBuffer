@@ -1,3 +1,4 @@
+package org.jayly;
 import java.util.ArrayList;
 
 /**
@@ -7,13 +8,9 @@ import java.util.ArrayList;
 public class Document {
     private String content;
     private ArrayList<String> lines;
-    private DocumentSaveMode saveMode;
-    private String filePath;
-    private String fileName;
 
-    public Document(String content, DocumentSaveMode saveMode) {
+    public Document(String content) {
         this.content = content;
-        this.saveMode = saveMode;
         this.lines = new ArrayList<>();
         for (String line : content.split("\n")) {
             this.lines.add(line);
@@ -61,17 +58,5 @@ public class Document {
         }
         lines.remove(lineNumber);
         this.content = String.join("\n", lines);
-    }
-
-    public DocumentSaveMode getSaveMode() {
-        return saveMode;
-    }
-
-    public String getFilePath() {
-        return filePath;
-    }
-
-    public String getFileName() {
-        return fileName;
     }
 }

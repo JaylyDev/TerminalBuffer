@@ -15,68 +15,97 @@ public class Editor {
      * Lines that scrolled off the top of the screen, preserved for history and
      * unmodifiable. Users can scroll up to view them.
      */
-    private ArrayList<String> scrollbackBuffer;
+    private ArrayList<ArrayList<CharacterCell>> scrollbackBuffer;
     private TerminalBuffer buffer;
     private Document document;
+    /**
+     * The line number of the top line of the screen.
+     */
+    private Integer topLineNumber;
 
     public Editor(TerminalBuffer buffer, Document document) {
         this.buffer = buffer;
         this.document = document;
+        this.topLineNumber = 0;
+    }
+
+    public Integer getLineNumberFromRow(Integer row) {
+        return this.topLineNumber + row;
     }
 
     public void deleteCharacter(Integer row, Integer column) {
-        String line = document.getLine(row);
+        final Integer lineNumber = this.getLineNumberFromRow(row);
+        String line = document.getLine(lineNumber);
         if (line == null || column < 0 || column >= line.length()) {
             return;
         }
         line = line.substring(0, column) + line.substring(column + 1);
-        document.setLine(row, line);
+        document.setLine(lineNumber, line);
 
-        setCursor(row, column);
+        Cursor cursor = buffer.getCursor();
+        cursor.moveCursorTo(row, column - 1);
     }
 
-    public void insertCharacter(Integer row, Integer column) {
-        String line = document.getLine(row);
+    public void insertCharacter(Integer row, Integer column, Character character) {
+        final Integer lineNumber = this.getLineNumberFromRow(row);
+        String line = document.getLine(lineNumber);
         if (line == null) {
             line = "";
         }
         if (column < 0 || column > line.length()) {
             return;
         }
-        line = line.substring(0, column) + " " + line.substring(column);
-        document.setLine(row, line);
+        line = line.substring(0, column) + character + line.substring(column);
+        document.setLine(lineNumber, line);
 
-        setCursor(row, column);
+        Cursor cursor = buffer.getCursor();
+        cursor.moveCursorTo(row, column + 1);
     }
 
     public void insertNewLine(Integer row) {
-        document.insertLine(row, "");
-        setCursor(row, 0);
+        final Integer lineNumber = this.getLineNumberFromRow(row);
+        document.insertLine(lineNumber, "");
+        
+        // Set cursor to the beginning of the new line
+        Cursor cursor = buffer.getCursor();
+        cursor.moveCursorTo(row, 0);
     }
 
     public void removeNewLine(Integer row) {
-        document.deleteLine(row);
-        setCursor(row, 0);
-    }
+        final Integer lineNumber = this.getLineNumberFromRow(row);
+        if (lineNumber <= 0) {
+            return;
+        }
+        document.deleteLine(lineNumber);
 
-    public void setCursor(Integer row, Integer column) {
-        Cursor cursor = buffer.getCursor();
-        cursor.setRow(row);
-        cursor.setColumn(column);
+        // Set cursor to the end of the previous line
+        final String previousLine = document.getLine(lineNumber - 1);
+        if (previousLine != null) {
+            Cursor cursor = buffer.getCursor();
+            cursor.moveCursorTo(row - 1, previousLine.length());
+        }
     }
 
     /**
      * Get character at position from screen and scrollback.
      */
-    public String getCharacterAt(Integer row, Integer column) {
-        return null;
+    public Character getCharacterAt(Integer row, Integer column) {
+        final CharacterCell cell = this.getAttributesAt(row, column);
+        if (cell == null) {
+            return null;
+        }
+        return cell.getCharacter();
     }
 
     /**
      * Get attributes at position from screen and scrollback.
      */
-    public String getAttributesAt(Integer row, Integer column) {
-        return null;
+    public CharacterCell getAttributesAt(Integer row, Integer column) {
+        final ArrayList<CharacterCell> rowGrid = screenGrid.get(row);
+        if (rowGrid == null || column < 0 || column >= rowGrid.size()) {
+            return null;
+        }
+        return rowGrid.get(column);
     }
 
     /**
