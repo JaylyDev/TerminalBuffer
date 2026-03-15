@@ -46,7 +46,18 @@ public class Cursor {
     }
 
     public void moveCursorRight() {
-        this.setColumn(this.getColumn() + 1);
+        int nextColumn = this.getColumn() + 1;
+        // If cursor reaches the right edge, wrap to next line at column 0
+        if (nextColumn >= buffer.getWidth()) {
+            int nextRow = this.getRow() + 1;
+            // Only wrap if there's a next row available
+            if (nextRow < buffer.getHeight()) {
+                this.row = nextRow;
+                this.column = 0;
+            }
+        } else {
+            this.column = nextColumn;
+        }
     }
 
     public void moveCursorTo(int row, int column) {

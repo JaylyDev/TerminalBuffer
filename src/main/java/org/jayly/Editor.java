@@ -46,10 +46,13 @@ public class Editor {
             if (line != null) {
                 ArrayList<LineGrid> Rows = splitLineIntoRows(line, buffer.getWidth());
 
-                // Track which document line each row came from
+                // Track which document line each row came from and the offset within that line
+                int columnOffset = 0;
                 for (LineGrid Row : Rows) {
                     RowGrid rowGrid = new RowGrid(Row.getChars());
-                    rowGrid.setLineNumber(lineNum);
+                    rowGrid.setLineOffset(lineNum);
+                    rowGrid.setColumnOffset(columnOffset);
+                    columnOffset += Row.getChars().size();
                     allRows.add(rowGrid);
                 }
             }
@@ -69,7 +72,7 @@ public class Editor {
         // Pad screen with empty lines if needed
         while (screenGrid.size() < buffer.getHeight()) {
             RowGrid rowGrid = new RowGrid(new ArrayList<>());
-            rowGrid.setLineNumber(-1); // no corresponding document line
+            rowGrid.setLineOffset(-1); // no corresponding document line
             screenGrid.add(rowGrid);
         }
     }
@@ -100,7 +103,7 @@ public class Editor {
         if (row < 0 || row >= screenGrid.size()) {
             return -1;
         }
-        return screenGrid.get(row).getLineNumber();
+        return screenGrid.get(row).getLineOffset();
     }
 
     /**
@@ -119,10 +122,28 @@ public class Editor {
     }
 
     /**
+     * Scroll down the screen grid by pushing rows to scrollback.
+     */
+    public void scrollDownScreenGrid(int numberOfRows) {
+        // Move top rows from screenGrid to scrollbackBuffer
+        for (int i = 0; i < numberOfRows && screenGrid.size() > 0; i++) {
+            RowGrid rowGrid = screenGrid.remove(0);
+            scrollbackBuffer.add(rowGrid);
+        }
+        // Trim scrollback if it exceeds max size
+        while (scrollbackBuffer.size() > buffer.getScrollbackMaxSize()) {
+            scrollbackBuffer.remove(0);
+        }
+    }
+
+    /**
      * Delete a character at screen position.
      * Modifies the document, then rebuilds the screen to reflect word wrapping.
      */
-    public void deleteCharacter(int row, int column) {
+    public void deleteCharacter() {
+        Cursor cursor = buffer.getCursor();
+        int row = cursor.getRow();
+        int column = cursor.getColumn();
         final int lineNumber = getLineNumberFromRow(row);
         if (lineNumber < 0) {
             return;
@@ -136,7 +157,6 @@ public class Editor {
         line.deleteChar(column);
         rebuildScreenGridAndScrollBackBuffer();
 
-        Cursor cursor = buffer.getCursor();
         cursor.moveCursorTo(row, column - 1);
     }
 
@@ -147,7 +167,9 @@ public class Editor {
      * Converts screen row coordinate to document line, inserts into document,
      * then rebuilds screen to handle word wrapping.
      */
-    public void insertCharacter(int row, int column, Character character) {
+    public void insertCharacter(Character character) {
+        Cursor cursor = buffer.getCursor();
+        int row = cursor.getRow();
         int lineNumber = getLineNumberFromRow(row);
 
         // If no document line exists for this screen row, create one
@@ -177,45 +199,61 @@ public class Editor {
             }
         }
 
-        // Insert character into document line
-        line.insertChar(column, newCell);
+        // Always append character to the end of the line
+        // This ensures sequential character insertion works correctly
+        line.insertChar(line.length(), newCell);
 
         // Rebuild screen from document to handle word wrapping
         rebuildScreenGridAndScrollBackBuffer();
 
-        // Update cursor
-        Cursor cursor = buffer.getCursor();
-        cursor.moveCursorTo(row, column + 1);
+        // Update cursor position to reflect the new character and wrapping
+        cursor.moveCursorRight();
     }
 
     /**
      * Insert a string of text into the document at the given screen position with
      * current styles.
      */
-    public void insertText(int row, int column, String text) {
+    public void insertText(String text) {
         for (int i = 0; i < text.length(); i++) {
-            this.insertCharacter(row, column + i, text.charAt(i));
+            this.insertCharacter(text.charAt(i));
         }
     }
 
     /**
      * Insert a new line in a specific row
      */
-    public void insertNewLine(int row) {
-        final int lineNumber = getLineNumberFromRow(row);
+    public void insertEmptyLine() {
+        Cursor cursor = buffer.getCursor();
+        int row = cursor.getRow();
+        int lineNumber = getLineNumberFromRow(row);
+
         if (lineNumber < 0) {
-            return;
+            lineNumber = document.getLineCount() - 1;
         }
 
-        document.insertLine(lineNumber + 1, new LineGrid(new ArrayList<>()));
+        if (lineNumber < 0) {
+            document.insertLine(0, new LineGrid(new ArrayList<>()));
+        } else {
+            document.insertLine(lineNumber + 1, new LineGrid(new ArrayList<>()));
+        }
+
         rebuildScreenGridAndScrollBackBuffer();
 
-        // Set cursor to the beginning of the new line
-        Cursor cursor = buffer.getCursor();
-        cursor.moveCursorTo(row + 1, 0);
+        // Move cursor to the beginning of the next line
+        int nextRow = row + 1;
+        if (nextRow >= buffer.getHeight()) {
+            // If the next row is beyond the screen, clamp to last row
+            // The rebuild already moved content to scrollback as needed
+            cursor.moveCursorTo(buffer.getHeight() - 1, 0);
+        } else {
+            cursor.moveCursorTo(nextRow, 0);
+        }
     }
 
-    public void removeNewLine(int row) {
+    public void removeLine() {
+        Cursor cursor = buffer.getCursor();
+        int row = cursor.getRow();
         final int lineNumber = getLineNumberFromRow(row);
         if (lineNumber < 0) {
             return;
@@ -230,7 +268,6 @@ public class Editor {
             if (prevLineNumber >= 0) {
                 LineGrid previousLine = document.getLine(prevLineNumber);
                 if (previousLine != null) {
-                    Cursor cursor = buffer.getCursor();
                     cursor.moveCursorTo(row - 1, previousLine.length());
                 }
             }

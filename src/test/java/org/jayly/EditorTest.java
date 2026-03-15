@@ -13,7 +13,7 @@ class EditorTest {
         Editor editor = buffer.getEditor();
 
         final String text = "Hello, World!";
-        editor.insertText(0, 0, text);
+        editor.insertText(text);
 
         assertTrue(document.getContent().contains(text));
     }
