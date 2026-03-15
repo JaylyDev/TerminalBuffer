@@ -8,7 +8,7 @@ public class ANSIColor {
     public static final String BOLD = "\u001B[1m";
     public static final String ITALIC = "\u001B[3m";
     public static final String UNDERLINE = "\u001B[4m";
-    
+
     // Text colors
     public static final String BLACK = "\u001B[30m";
     public static final String RED = "\u001B[31m";

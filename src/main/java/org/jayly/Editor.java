@@ -28,6 +28,60 @@ public class Editor {
         this.buffer = buffer;
         this.document = document;
         this.lineOffset = 0;
+        this.screenGrid = new ArrayList<LineGrid>();
+        this.scrollbackBuffer = new ArrayList<LineGrid>();
+
+        this.rebuildScreenGrid();
+    }
+
+    /**
+     * Rebuild screenGrid to reflect the current viewport of the document.
+     * screenGrid contains references to document lines from lineOffset to
+     * lineOffset+height.
+     */
+    private void rebuildScreenGrid() {
+        screenGrid.clear();
+        final int height = buffer.getHeight();
+        for (int i = 0; i < height; i++) {
+            final int lineNumber = lineOffset + i;
+            LineGrid line = document.getLine(lineNumber);
+            if (line != null) {
+                screenGrid.add(line);
+            } else {
+                // Add empty line if document doesn't have this line yet
+                screenGrid.add(new LineGrid(new ArrayList<>()));
+            }
+        }
+    }
+
+    /**
+     * Handle automatic scrolling when content exceeds screen height.
+     * Moves off-screen lines to scrollbackBuffer and adjusts lineOffset.
+     */
+    private void handleScrolling() {
+        final int height = buffer.getHeight();
+        final int totalLines = document.getLineCount();
+
+        // If document exceeds screen, scroll to show the bottom
+        if (totalLines > height) {
+            final int newOffset = totalLines - height;
+
+            // Move lines that scrolled off the top to scrollbackBuffer
+            if (lineOffset < newOffset) {
+                for (int i = lineOffset; i < newOffset; i++) {
+                    LineGrid offScreenLine = document.getLine(i);
+                    if (offScreenLine != null) {
+                        scrollbackBuffer.add(offScreenLine);
+
+                        if (scrollbackBuffer.size() > buffer.getScrollbackMaxSize()) {
+                            scrollbackBuffer.remove(0);
+                        }
+                    }
+                }
+            }
+
+            lineOffset = newOffset;
+        }
     }
 
     public int getLineNumberFromRow(int row) {
@@ -41,6 +95,8 @@ public class Editor {
             return;
         }
         line.deleteChar(column);
+        rebuildScreenGrid();
+        handleScrolling();
 
         Cursor cursor = buffer.getCursor();
         cursor.moveCursorTo(row, column - 1);
@@ -92,6 +148,8 @@ public class Editor {
         for (int i = 0; i < text.length(); i++) {
             this.insertCharacter(row, column + i, text.charAt(i));
         }
+        rebuildScreenGrid();
+        handleScrolling();
     }
 
     /**
@@ -100,6 +158,8 @@ public class Editor {
     public void insertNewLine(int row) {
         final int lineNumber = this.getLineNumberFromRow(row);
         document.insertLine(lineNumber, new LineGrid(new ArrayList<CharacterCell>()));
+        rebuildScreenGrid();
+        handleScrolling();
 
         // Set cursor to the beginning of the new line
         Cursor cursor = buffer.getCursor();
@@ -155,7 +215,12 @@ public class Editor {
      *            the file.
      */
     public String getLine(int row) {
-        return null;
+        if (row < 0 || row >= screenGrid.size()) {
+            return "";
+        }
+        LineGrid line = screenGrid.get(row);
+        String text = line.getDisplayText(buffer.getWidth());
+        return text;
     }
 
     /**
@@ -163,6 +228,13 @@ public class Editor {
      * user should see in terminal.
      */
     public String getScreenContent() {
-        return null;
+        StringBuilder sb = new StringBuilder();
+        for (int row = 0; row < screenGrid.size(); row++) {
+            sb.append(this.getLine(row));
+            if (row < screenGrid.size() - 1) {
+                sb.append("\n");
+            }
+        }
+        return sb.toString();
     }
 }

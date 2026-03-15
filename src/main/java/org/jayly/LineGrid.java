@@ -50,7 +50,7 @@ public class LineGrid {
     }
 
     /**
-     * Returns the display text for this line, which may include ANSI codes and text wrapping. 
+     * Returns the display text for this line, which may include ANSI codes and text wrapping.
      */
     public String getDisplayText(int maxWidth) {
         StringBuilder sb = new StringBuilder();

@@ -12,6 +12,14 @@ public class Document {
         this.lines = new ArrayList<LineGrid>();
     }
 
+
+    /**
+     * @return the number of lines in the document
+     */
+    public int getLineCount() {
+        return lines.size();
+    }
+
     /**
      * Get the full content of the document as a single string.
      */

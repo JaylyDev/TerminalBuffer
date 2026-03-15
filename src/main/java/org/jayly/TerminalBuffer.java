@@ -134,4 +134,8 @@ public class TerminalBuffer {
     public Boolean isStyleEnabled(StyleFlag style) {
         return this.styles.get(style);
     }
+
+    public int getScrollbackMaxSize() {
+        return this.scrollbackMaxSize;
+    }
 }
