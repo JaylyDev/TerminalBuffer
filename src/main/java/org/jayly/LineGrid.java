@@ -36,10 +36,17 @@ public class LineGrid {
      */
     public String getText() {
         StringBuilder sb = new StringBuilder();
-        for (CharacterCell cell : chars) {
-            sb.append(cell.getDisplayText());
+        CharacterCell prevCell = null;
+        for (int i = 0; i < chars.size(); i++) {
+            CharacterCell cell = chars.get(i);
+            if (prevCell == null || !cell.isStyleEquals(prevCell)) {
+                sb.append(cell.getDisplayText());
+            } else {
+                sb.append(cell.getCharacter());
+            }
+            prevCell = cell;
         }
-        return sb.toString();
+        return sb.toString() + ANSIColor.RESET;
     }
 
     /**
@@ -48,17 +55,25 @@ public class LineGrid {
     public String getDisplayText(int maxWidth) {
         StringBuilder sb = new StringBuilder();
         int lineWidth = 0;
-        for (CharacterCell cell : chars) {
-            String cellText = cell.getDisplayText();
-            if (lineWidth + cellText.length() > maxWidth) {
+        CharacterCell prevCell = null;
+        for (int i = 0; i < chars.size(); i++) {
+            CharacterCell cell = chars.get(i);
+            String cellText;
+            if (prevCell == null || !cell.isStyleEquals(prevCell)) {
+                cellText = cell.getDisplayText();
+            } else {
+                cellText = String.valueOf(cell.getCharacter());
+            }
+            if (lineWidth + 1 > maxWidth) {
                 sb.append("\n");
                 lineWidth = 0;
             }
             sb.append(cellText);
 
             lineWidth += 1; // ANSI codes don't take up width
+            prevCell = cell;
         }
-        return sb.toString();
+        return sb.toString() + ANSIColor.RESET;
     }
 
     /**

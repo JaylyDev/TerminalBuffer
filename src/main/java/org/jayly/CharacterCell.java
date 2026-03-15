@@ -51,10 +51,35 @@ public class CharacterCell {
     }
 
     /**
-     * Returns the display text for this character cell, which may include ANSI escape codes for styles and colors.
+     * Checks if this character cell equals to another character cell, based on
+     * styles and colors.
+     */
+    public boolean isStyleEquals(CharacterCell other) {
+        final boolean stylesEqual = this.styles.equals(other.styles);
+        boolean foregroundEqual = false;
+        if (this.foregroundColor == null) {
+            foregroundEqual = other.foregroundColor == null;
+        } else {
+            foregroundEqual = this.foregroundColor.equals(other.foregroundColor);
+        }
+
+        boolean backgroundEqual = false;
+        if (this.backgroundColor == null) {
+            backgroundEqual = other.backgroundColor == null;
+        } else {
+            backgroundEqual = this.backgroundColor.equals(other.backgroundColor);
+        }
+
+        return stylesEqual && foregroundEqual && backgroundEqual;
+    }
+
+    /**
+     * Returns the display text for this character cell, which may include ANSI
+     * escape codes for styles and colors.
      */
     public String getDisplayText() {
         StringBuilder sb = new StringBuilder();
+        sb.append(ANSIColor.RESET);
         if (styles.get(StyleFlag.BOLD)) {
             sb.append(ANSIColor.BOLD);
         }
@@ -71,7 +96,6 @@ public class CharacterCell {
             sb.append(backgroundColor);
         }
         sb.append(character);
-        sb.append(ANSIColor.RESET);
         return sb.toString();
     }
 }
