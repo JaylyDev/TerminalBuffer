@@ -6,50 +6,53 @@ import java.util.ArrayList;
  */
 // TODO: Add subclasses for disk and in-memory documents if needed.
 public class Document {
-    private String content;
-    private ArrayList<String> lines;
+    private ArrayList<LineGrid> lines;
 
-    public Document(String content) {
-        this.content = content;
-        this.lines = new ArrayList<>();
-        for (String line : content.split("\n")) {
-            this.lines.add(line);
-        }
+    public Document() {
+        this.lines = new ArrayList<LineGrid>();
     }
 
+    /**
+     * Get the full content of the document as a single string.
+     */
     public String getContent() {
-        return content;
+        StringBuilder sb = new StringBuilder();
+        for (LineGrid line : lines) {
+            sb.append(line.getText()).append("\n");
+        }
+        return sb.toString();
     }
 
-    public String getLine(int lineNumber) {
+    /**
+     * Get a specific line of the document.
+     */
+    public LineGrid getLine(int lineNumber) {
         if (lineNumber < 0 || lineNumber >= lines.size()) {
             return null;
         }
         return lines.get(lineNumber);
     }
 
-    public ArrayList<String> getLines() {
+    public ArrayList<LineGrid> getLines() {
         return lines;
     }
 
-    public ArrayList<String> getLines(int startLine, int endLine) {
+    public ArrayList<LineGrid> getLines(int startLine, int endLine) {
         if (startLine < 0 || endLine >= lines.size() || startLine > endLine) {
             return null;
         }
-        return new ArrayList<String>(lines.subList(startLine, endLine + 1));
+        return new ArrayList<LineGrid>(lines.subList(startLine, endLine + 1));
     }
 
-    public void setLine(int lineNumber, String newLine) {
+    public void setLine(int lineNumber, LineGrid newLine) {
         if (lineNumber < 0 || lineNumber >= lines.size()) {
             return;
         }
         lines.set(lineNumber, newLine);
-        this.content = String.join("\n", lines);
     }
 
-    public void insertLine(int lineNumber, String newLine) {
+    public void insertLine(int lineNumber, LineGrid newLine) {
         lines.add(lineNumber, newLine);
-        this.content = String.join("\n", lines);
     }
 
     public void deleteLine(int lineNumber) {
@@ -57,6 +60,5 @@ public class Document {
             return;
         }
         lines.remove(lineNumber);
-        this.content = String.join("\n", lines);
     }
 }

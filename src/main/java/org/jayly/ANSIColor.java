@@ -5,6 +5,9 @@ public class ANSIColor {
      * ANSI code to reset colour and background of a character cell.
      */
     public static final String RESET = "\u001B[0m";
+    public static final String BOLD = "\u001B[1m";
+    public static final String ITALIC = "\u001B[3m";
+    public static final String UNDERLINE = "\u001B[4m";
     
     // Text colors
     public static final String BLACK = "\u001B[30m";

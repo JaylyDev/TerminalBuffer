@@ -16,11 +16,13 @@ public class TerminalBuffer {
      */
     private int scrollbackMaxSize;
     /**
-     * Represent text color to be applied using the ANSIColor enum.
+     * Represent text color to be applied using the ANSIColor enum. Returns null if
+     * using default color.
      */
     private String foregroundColor;
     /**
-     * Represent background color to be applied using the ANSIColor enum.
+     * Represent background color to be applied using the ANSIColor enum. Returns
+     * null if using default color.
      */
     private String backgroundColor;
     /**
@@ -40,6 +42,7 @@ public class TerminalBuffer {
         this.scrollbackMaxSize = scrollbackMaxSize;
         this.document = document;
         this.cursor = new Cursor(this);
+        this.editor = new Editor(this, document);
 
         // Default styles
         this.styles = new HashMap<>();
@@ -68,11 +71,39 @@ public class TerminalBuffer {
         this.scrollbackMaxSize = scrollbackMaxSize;
     }
 
+    /**
+     * Reset foreground color to default.
+     */
+    public void setForegroundColor() {
+        this.foregroundColor = null;
+    }
+
+    /**
+     * Sets foreground color.
+     */
     public void setForegroundColor(String foregroundColor) {
+        if (foregroundColor == ANSIColor.RESET) {
+            this.foregroundColor = null;
+            return;
+        }
         this.foregroundColor = foregroundColor;
     }
 
+    /**
+     * Reset background color to default.
+     */
+    public void setBackgroundColor() {
+        this.backgroundColor = null;
+    }
+
+    /**
+     * Sets background color.
+     */
     public void setBackgroundColor(String backgroundColor) {
+        if (backgroundColor == ANSIColor.RESET) {
+            this.backgroundColor = null;
+            return;
+        }
         this.backgroundColor = backgroundColor;
     }
 
@@ -90,5 +121,17 @@ public class TerminalBuffer {
 
     public Editor getEditor() {
         return this.editor;
+    }
+
+    public String getForegroundColor() {
+        return this.foregroundColor;
+    }
+
+    public String getBackgroundColor() {
+        return this.backgroundColor;
+    }
+
+    public Boolean isStyleEnabled(StyleFlag style) {
+        return this.styles.get(style);
     }
 }
