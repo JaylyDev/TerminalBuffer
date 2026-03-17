@@ -33,20 +33,48 @@ public class Cursor {
         this.row = row;
     }
 
-    public void moveCursorUp() {
+    public void moveUp() {
         this.setRow(this.getRow() - 1);
     }
 
-    public void moveCursorDown() {
+    public void moveUp(int cells) {
+        for (int i = 0; i < cells; i++) {
+            this.moveUp();
+        }
+    }
+
+    public void moveDown() {
         this.setRow(this.getRow() + 1);
     }
 
-    public void moveCursorLeft() {
-        this.setColumn(this.getColumn() - 1);
+    public void moveDown(int cells) {
+        for (int i = 0; i < cells; i++) {
+            this.moveDown();
+        }
     }
 
-    public void moveCursorRight() {
-        int nextColumn = this.getColumn() + 1;
+    public void moveLeft() {
+        final int nextColumn = this.getColumn() - 1;
+        if (nextColumn < 0) {
+            int nextRow = this.getRow() - 1;
+            // Only wrap if there's a previous row available
+            if (nextRow >= 0) {
+                this.row = nextRow;
+                this.column = buffer.getWidth() - 1; // Move to the end of the previous line
+            }
+        } else {
+            this.column = nextColumn;
+        }
+    }
+
+    public void moveLeft(int cells) {
+        for (int i = 0; i < cells; i++) {
+            this.moveLeft();
+        }
+    }
+
+    public void moveRight() {
+        final int nextColumn = this.getColumn() + 1;
         // If cursor reaches the right edge, wrap to next line at column 0
         if (nextColumn >= buffer.getWidth()) {
             int nextRow = this.getRow() + 1;
@@ -60,7 +88,13 @@ public class Cursor {
         }
     }
 
-    public void moveCursorTo(int row, int column) {
+    public void moveRight(int cells) {
+        for (int i = 0; i < cells; i++) {
+            this.moveRight();
+        }
+    }
+
+    public void moveTo(int row, int column) {
         this.setRow(row);
         this.setColumn(column);
     }

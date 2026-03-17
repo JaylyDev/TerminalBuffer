@@ -157,7 +157,7 @@ public class Editor {
         line.deleteChar(column);
         rebuildScreenGridAndScrollBackBuffer();
 
-        cursor.moveCursorTo(row, column - 1);
+        cursor.moveTo(row, column - 1);
     }
 
     /**
@@ -207,7 +207,7 @@ public class Editor {
         rebuildScreenGridAndScrollBackBuffer();
 
         // Update cursor position to reflect the new character and wrapping
-        cursor.moveCursorRight();
+        cursor.moveRight();
     }
 
     /**
@@ -245,9 +245,9 @@ public class Editor {
         if (nextRow >= buffer.getHeight()) {
             // If the next row is beyond the screen, clamp to last row
             // The rebuild already moved content to scrollback as needed
-            cursor.moveCursorTo(buffer.getHeight() - 1, 0);
+            cursor.moveTo(buffer.getHeight() - 1, 0);
         } else {
-            cursor.moveCursorTo(nextRow, 0);
+            cursor.moveTo(nextRow, 0);
         }
     }
 
@@ -268,7 +268,7 @@ public class Editor {
             if (prevLineNumber >= 0) {
                 LineGrid previousLine = document.getLine(prevLineNumber);
                 if (previousLine != null) {
-                    cursor.moveCursorTo(row - 1, previousLine.length());
+                    cursor.moveTo(row - 1, previousLine.length());
                 }
             }
         }
