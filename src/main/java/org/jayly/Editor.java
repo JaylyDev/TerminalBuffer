@@ -244,8 +244,10 @@ public class Editor {
     }
 
     public void overrideText(String text) {
+        Cursor cursor = buffer.getCursor();
         for (int i = 0; i < text.length(); i++) {
             this.overrideCharacter(text.charAt(i));
+            cursor.moveRight();
         }
     }
 
