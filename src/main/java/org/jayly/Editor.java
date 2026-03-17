@@ -1,6 +1,7 @@
 package org.jayly;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Represents an editor to edit files
@@ -10,13 +11,13 @@ public class Editor {
      * The last N lines that fit the screen dimensions (e.g., 80×24). This is the
      * editable part and what users see.
      */
-    private ArrayList<RowGrid> screenGrid;
+    private final ArrayList<RowGrid> screenGrid;
     /**
      * Lines that scrolled off the top of the screen, preserved for history and
      * unmodifiable. Users can scroll up to view them.
      */
-    private ArrayList<RowGrid> scrollbackBuffer;
-    private TerminalBuffer buffer;
+    private final ArrayList<RowGrid> scrollbackBuffer;
+    private final TerminalBuffer buffer;
     private Document document;
 
     public Editor(TerminalBuffer buffer, Document document) {
@@ -126,13 +127,13 @@ public class Editor {
      */
     public void scrollDownScreenGrid(int numberOfRows) {
         // Move top rows from screenGrid to scrollbackBuffer
-        for (int i = 0; i < numberOfRows && screenGrid.size() > 0; i++) {
-            RowGrid rowGrid = screenGrid.remove(0);
+        for (int i = 0; i < numberOfRows && !screenGrid.isEmpty(); i++) {
+            RowGrid rowGrid = screenGrid.removeFirst();
             scrollbackBuffer.add(rowGrid);
         }
         // Trim scrollback if it exceeds max size
         while (scrollbackBuffer.size() > buffer.getScrollbackMaxSize()) {
-            scrollbackBuffer.remove(0);
+            scrollbackBuffer.removeFirst();
         }
     }
 
@@ -217,6 +218,34 @@ public class Editor {
     public void insertText(String text) {
         for (int i = 0; i < text.length(); i++) {
             this.insertCharacter(text.charAt(i));
+        }
+    }
+
+    public void overrideCharacter(Character character) {
+        Cursor cursor = buffer.getCursor();
+        int row = cursor.getRow();
+        int column = cursor.getColumn();
+        final int lineNumber = getLineNumberFromRow(row);
+        if (lineNumber < 0) {
+            return;
+        }
+
+        LineGrid line = document.getLine(lineNumber);
+        if (line == null) {
+            return;
+        }
+
+        CharacterCell cell = line.getChars().get(column);
+        if (cell == null) {
+            return;
+        }
+
+        cell.setCharacter(character);
+    }
+
+    public void overrideText(String text) {
+        for (int i = 0; i < text.length(); i++) {
+            this.overrideCharacter(text.charAt(i));
         }
     }
 
@@ -338,5 +367,83 @@ public class Editor {
             sb.append("\n");
         }
         return sb.toString();
+    }
+
+    // TODO: Investigate if we need to clear document content as well.
+    public void clearScreen(Boolean clearScrollback) {
+        buffer.getCursor().moveTo(0, 0);
+
+        screenGrid.clear();
+        if (clearScrollback) {
+            scrollbackBuffer.clear();
+        }
+    }
+
+    public void clearScreen() {
+        this.clearScreen(false);
+    }
+
+    public Character getCharacterFromScrollback(int row, int column) {
+        if (row < 0 || row >= scrollbackBuffer.size()) {
+            return null;
+        }
+        LineGrid line = scrollbackBuffer.get(row);
+        if (line == null) {
+            return null;
+        }
+        ArrayList<CharacterCell> cells = line.getChars();
+        if (cells == null || column < 0 || column >= cells.size()) {
+            return null;
+        }
+        CharacterCell cell = cells.get(column);
+        if (cell == null) {
+            return null;
+        }
+        return cell.getCharacter();
+    }
+
+    public String getLineFromScrollback(int row) {
+        if (row < 0 || row >= scrollbackBuffer.size()) {
+            return "";
+        }
+        LineGrid line = scrollbackBuffer.get(row);
+        return line.getDisplayText(buffer.getWidth());
+    }
+
+    public String getScreenAndScrollbackText() {
+        return this.getScrollbackContent() + this.getScreenContent();
+    }
+
+    /**
+     * Fill the entire line cursor is on with the given character, overriding
+     * existing characters and styles.
+     */
+    public void fillLine(CharacterCell cell) {
+        Cursor cursor = buffer.getCursor();
+        int row = cursor.getRow();
+        if (row < 0 || row >= screenGrid.size()) {
+            return;
+        }
+        LineGrid lineGrid = screenGrid.get(row);
+        ArrayList<CharacterCell> cells = new ArrayList<>();
+        for (int i = 0; i < buffer.getWidth(); i++) {
+            // Create immutable character cells based on the input cell to avoid modifying
+            // the same cell instance
+            CharacterCell newCell = new CharacterCell();
+            newCell.setCharacter(cell.getCharacter());
+            newCell.setForegroundColor(cell.getForegroundColor());
+            newCell.setBackgroundColor(cell.getBackgroundColor());
+
+            HashMap<StyleFlag, Boolean> styles = cell.getStyles();
+            final Boolean bold = styles.get(StyleFlag.BOLD);
+            final Boolean italic = styles.get(StyleFlag.ITALIC);
+            final Boolean underline = styles.get(StyleFlag.UNDERLINE);
+            newCell.setStyle(StyleFlag.BOLD, bold);
+            newCell.setStyle(StyleFlag.ITALIC, italic);
+            newCell.setStyle(StyleFlag.UNDERLINE, underline);
+            cells.add(newCell);
+        }
+
+        lineGrid.setChars(cells);
     }
 }
