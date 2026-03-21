@@ -11,7 +11,8 @@ A terminal text buffer that stores and manipulates displayed text built in Java.
 
 ## Setup
 
-> [!NOTE] This project has only been tested on Java 24.
+> [!NOTE]
+> This project has only been tested on Java 24.
 
 ### Clone the repository
 
